@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodgram-frontend
+  namespace: foodgram
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foodgram-frontend
+  template:
+    metadata:
+      labels:
+        app: foodgram-frontend
+    spec:
+      containers:
+      - name: nginx
+        image: a7med373/foodgram-frontend-st:latest
+        ports:
+        - containerPort: 80
+        command: ["nginx"]
+        args: ["-g", "daemon off;"]
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/
+        - name: media-pvc
+          mountPath: /var/html/backend_media
+        - name: static-pvc
+          mountPath: /var/html/backend_static
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+      - name: media-pvc
+        persistentVolumeClaim:
+          claimName: media-pvc
+      - name: static-pvc
+        persistentVolumeClaim:
+          claimName: static-pvc

@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodgram-backend
+  namespace: foodgram
+  labels:
+    app: foodgram-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: foodgram-backend
+  template:
+    metadata:
+      labels:
+        app: foodgram-backend
+    spec:
+      containers:
+      - name: foodgram-backend
+        image: a7med373/foodgram-st:v.2.1
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: foodgram-static
+          mountPath: /app/backend_static/
+        - name: foodgram-media
+          mountPath: /app/backend_media/
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-configmap
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-configmap
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-configmap
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-configmap
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+      volumes:
+        - name: foodgram-static
+          persistentVolumeClaim:
+            claimName: static-pvc
+        - name: foodgram-media
+          persistentVolumeClaim:
+            claimName: media-pvc
+

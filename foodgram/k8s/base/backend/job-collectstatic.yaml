@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-collectstatic
+  namespace: foodgram
+spec:
+  template:
+    spec:
+      containers:
+      - name: collectstatic
+        image: a7med373/foodgram-st:v.2.1
+        command: ["python",  "manage.py", "collectstatic", "--no-input"]
+        volumeMounts:
+        - name: static-files
+          mountPath: /app/backend_static/
+      restartPolicy: OnFailure
+      volumes:
+      - name: static-files
+        persistentVolumeClaim:
+          claimName: static-pvc
+  backoffLimit: 4
