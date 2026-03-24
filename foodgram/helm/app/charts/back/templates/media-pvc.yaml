@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "back.mediaName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "back.labels" . | indent 4 }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.media.storage }}
+  storageClassName: {{ .Values.persistence.media.storageClassName }}

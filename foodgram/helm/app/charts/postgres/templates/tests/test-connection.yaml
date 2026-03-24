@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ printf "%s-test-connection" (include "postgres.fullname" .) | quote }}
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: nc
+      image: busybox:1.36
+      command: ['sh', '-c', 'nc -zvw3 {{ .Chart.Name }}-service {{ .Values.service.ports.port }}']
+  restartPolicy: Never

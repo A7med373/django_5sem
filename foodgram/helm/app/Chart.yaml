@@ -1,0 +1,18 @@
+apiVersion: v2
+name: app
+description: Foodgram umbrella Helm chart (back / front / postgres)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+icon: https://raw.githubusercontent.com/kubernetes/kubernetes/master/logo/logo.svg
+kubeVersion: ">=1.24.0-0"
+dependencies:
+  - name: back
+    version: 0.1.0
+    repository: "file://charts/back"
+  - name: front
+    version: 0.1.0
+    repository: "file://charts/front"
+  - name: postgres
+    version: 0.1.0
+    repository: "file://charts/postgres"

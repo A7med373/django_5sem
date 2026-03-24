@@ -1,0 +1,46 @@
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  name: ""
+
+deployment:
+  container:
+    name: nginx
+    command: ["nginx"]
+    args: ["-g", "daemon off;"]
+  replicas: 1
+  image:
+    name: a7med373/foodgram-frontend-st
+    tag: latest
+  ports:
+    containerPort: 80
+  nginxConfig:
+    configMapName: nginx-config
+  volumes:
+    media:
+      pvcName: media-pvc
+      mountPath: "/var/html/backend_media"
+    static:
+      pvcName: static-pvc
+      mountPath: "/var/html/backend_static"
+
+service:
+  type: ClusterIP
+  ports:
+    protocol: TCP
+    port: 80
+    targetPort: 80
+
+config:
+  nginxConf: |
+    server { listen 80; }
+
+global:
+  mediaPvc:
+    name: media-pvc
+  staticPvc:
+    name: static-pvc
+  serviceName:
+    front: foodgram-frontend-service

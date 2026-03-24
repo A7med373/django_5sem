@@ -1,0 +1,24 @@
+server:
+  dev:
+    enabled: false
+  standalone:
+    enabled: true
+  dataStorage:
+    enabled: true
+    size: 8Gi
+  service:
+    enabled: true
+    type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - host: vault.local
+        paths:
+          - /
+  extraEnvironmentVars:
+    VAULT_API_ADDR: "http://vault.local"
+ui:
+  enabled: true
+injector:
+  enabled: false

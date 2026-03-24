@@ -1,0 +1,2 @@
+Release: {{ .Release.Name }} ({{ .Release.Namespace }})
+Ingress: http://{{ .Values.ingress.host }}/

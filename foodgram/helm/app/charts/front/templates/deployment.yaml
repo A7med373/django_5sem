@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "front.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+{{ include "front.selectorLabels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "front.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: {{ .Values.deployment.container.name }}
+        {{- with .Values.deployment.image }}
+        image: {{ printf "%s:%s" .name .tag }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.deployment.ports.containerPort }}
+        command:
+{{ toYaml .Values.deployment.container.command | indent 10 }}
+        args:
+{{ toYaml .Values.deployment.container.args | indent 10 }}
+        volumeMounts:
+        - name: {{ .Chart.Name }}-nginx-config
+          mountPath: /etc/nginx/conf.d/
+        - name: {{ .Values.deployment.volumes.media.pvcName }}
+          mountPath: {{ .Values.deployment.volumes.media.mountPath }}
+        - name: {{ .Values.deployment.volumes.static.pvcName }}
+          mountPath: {{ .Values.deployment.volumes.static.mountPath }}
+      volumes:
+      - name: {{ .Chart.Name }}-nginx-config
+        configMap:
+          name: {{ .Chart.Name }}-nginx-config
+      - name: {{ .Values.deployment.volumes.media.pvcName }}
+        persistentVolumeClaim:
+          claimName: {{ $.Values.global.mediaPvc.name }}
+      - name: {{ .Values.deployment.volumes.static.pvcName }}
+        persistentVolumeClaim:
+          claimName: {{ $.Values.global.staticPvc.name }}

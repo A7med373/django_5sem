@@ -1,0 +1,12 @@
+dependencies:
+- name: back
+  repository: file://charts/back
+  version: 0.1.0
+- name: front
+  repository: file://charts/front
+  version: 0.1.0
+- name: postgres
+  repository: file://charts/postgres
+  version: 0.1.0
+digest: sha256:9c2c4f312372d28d570f118cbf024b5d2888ee6360a76626e9d5ccfb0dfcf12f
+generated: "2026-03-24T21:07:45.972936+03:00"

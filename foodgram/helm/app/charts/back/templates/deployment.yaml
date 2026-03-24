@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "back.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+{{ include "back.selectorLabels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "back.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}-deployment
+        {{- with .Values.deployment.image }}
+        image: {{ printf "%s:%s" .name .tag }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.deployment.ports.containerPort }}
+        volumeMounts:
+        - name: {{ .Chart.Name }}-static
+          mountPath: {{ .Values.deployment.volumeMounts.staticMountPath }}
+        - name: {{ .Chart.Name }}-media
+          mountPath: {{ .Values.deployment.volumeMounts.mediaMountPath }}
+        env:
+        {{- range $key, $val := .Values.deployment.env.config }}
+        - name: {{ $key }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ $.Values.global.config.name }}
+              key: {{ $val }}
+        {{- end }}
+        {{- range $key, $val := .Values.deployment.env.secret }}
+        - name: {{ $key }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.global.secret.name }}
+              key: {{ $val }}
+        {{- end }}
+        {{- range $key, $val := .Values.deployment.env.values }}
+        - name: {{ $key }}
+          value: {{ $val | quote }}
+        {{- end }}
+
+      volumes:
+        - name: {{ .Chart.Name }}-static
+          persistentVolumeClaim:
+            claimName: {{ include "back.staticName" . }}
+        - name: {{ .Chart.Name }}-media
+          persistentVolumeClaim:
+            claimName: {{ include "back.mediaName" . }}

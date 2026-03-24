@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-import-data
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+{{ include "back.labels" . | indent 4 }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}-import-data
+        {{- with .Values.deployment.image }}
+        image: {{ printf "%s:%s" .name .tag }}
+        {{- end }}
+        command: ["python", "manage.py", "import_data"]
+        env:
+        {{- range $key, $val := .Values.deployment.env.config }}
+        - name: {{ $key }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ $.Values.global.config.name }}
+              key: {{ $val }}
+        {{- end }}
+        {{- range $key, $val := .Values.deployment.env.secret }}
+        - name: {{ $key }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.global.secret.name }}
+              key: {{ $val }}
+        {{- end }}
+        {{- range $key, $val := .Values.deployment.env.values }}
+        - name: {{ $key }}
+          value: {{ $val | quote }}
+        {{- end }}
+      restartPolicy: {{ .Values.importDataJob.restartPolicy }}
+  backoffLimit: {{ .Values.importDataJob.backoffLimit }}

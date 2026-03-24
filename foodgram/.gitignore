@@ -140,3 +140,8 @@ dmypy.json
 
 static/
 media/
+
+# Helm / Vault local secrets
+helm/app/charts/*.tgz
+vault-init.json
+vault-foodgram-policy.hcl

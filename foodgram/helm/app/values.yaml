@@ -1,0 +1,198 @@
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: false
+  name: ""
+
+global:
+  secret:
+    name: db-secret
+  config:
+    name: db-config
+  mediaPvc:
+    name: media-pvc
+  staticPvc:
+    name: static-pvc
+  serviceName:
+    front: foodgram-frontend-service
+
+# Vault refs (helm-secrets + vals); override paths to match your Vault KV layout
+postgres:
+  secrets:
+    postgres-password: ref+vault://kv/data/foodgram/db#postgres-password
+    postgres-user: ref+vault://kv/data/foodgram/db#postgres-user
+    postgres-name: ref+vault://kv/data/foodgram/db#postgres-name
+  configMap:
+    DB_PORT: "5432"
+    DB_HOST: ""
+  service:
+    type: ClusterIP
+    ports:
+      port: 5432
+      targetPort: 5432
+  statefulset:
+    mountPath: /var/lib/postgresql/data
+    replicas: 1
+    image:
+      name: postgres
+      tag: 14.0-alpine
+    pvc:
+      accessModes: ReadWriteOnce
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 10Gi
+    env:
+      values: {}
+      config:
+        DB_HOST: DB_HOST
+        DB_PORT: DB_PORT
+      secret:
+        POSTGRES_PASSWORD: postgres-password
+        POSTGRES_USER: postgres-user
+        POSTGRES_DB: postgres-name
+  nameOverride: ""
+  fullnameOverride: ""
+  serviceAccount:
+    create: false
+    name: ""
+
+ingress:
+  host: foodgram.local
+  className: nginx
+  port:
+    number: 80
+
+back:
+  deployment:
+    replicas: 3
+    image:
+      name: a7med373/foodgram-st
+      tag: v.2.1
+    ports:
+      containerPort: 8000
+    volumeMounts:
+      staticMountPath: /app/backend_static/
+      mediaMountPath: /app/backend_media/
+    env:
+      values: {}
+      config:
+        DB_PORT: DB_PORT
+        DB_HOST: DB_HOST
+      secret:
+        DB_NAME: postgres-name
+        DB_USER: postgres-user
+        DB_PASSWORD: postgres-password
+    pvc:
+      static:
+        pvcName: static-pvc
+      media:
+        pvcName: media-pvc
+  importDataJob:
+    restartPolicy: OnFailure
+    backoffLimit: 4
+  jobCollectstatic:
+    mountPath: /app/backend_static/
+    restartPolicy: OnFailure
+    backoffLimit: 4
+  jobMigrate:
+    restartPolicy: OnFailure
+    backoffLimit: 4
+  service:
+    type: ClusterIP
+    ports:
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+  persistence:
+    static:
+      storage: 5Gi
+      storageClassName: standard
+    media:
+      storage: 10Gi
+      storageClassName: standard
+  nameOverride: ""
+  fullnameOverride: ""
+  serviceAccount:
+    create: false
+    name: ""
+
+front:
+  deployment:
+    container:
+      name: nginx
+      command: ["nginx"]
+      args: ["-g", "daemon off;"]
+    replicas: 1
+    image:
+      name: a7med373/foodgram-frontend-st
+      tag: latest
+    ports:
+      containerPort: 80
+    nginxConfig:
+      configMapName: nginx-config
+    volumes:
+      media:
+        pvcName: media-pvc
+        mountPath: "/var/html/backend_media"
+      static:
+        pvcName: static-pvc
+        mountPath: "/var/html/backend_static"
+  service:
+    type: ClusterIP
+    ports:
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  config:
+    nginxConf: |
+      server {
+          listen 80;
+          client_max_body_size 10M;
+          server_tokens off;
+
+          location /backend_media/ {
+              root /var/html/;
+          }
+
+          location /api/ {
+              proxy_pass http://back-service:8000;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+
+          location /admin/ {
+              proxy_pass http://back-service:8000;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+
+          location /api/docs/ {
+              root /usr/share/nginx/html;
+              try_files $uri $uri/redoc.html;
+          }
+
+          location / {
+              root /usr/share/nginx/html;
+              index index.html index.htm;
+              try_files $uri $uri/ /index.html;
+          }
+
+          error_page 500 502 503 504 /50x.html;
+          location = /50x.html {
+              root /usr/share/nginx/html;
+          }
+
+          location /backend_static/ {
+              root /var/html/;
+          }
+      }
+  nameOverride: ""
+  fullnameOverride: ""
+  serviceAccount:
+    create: false
+    name: ""

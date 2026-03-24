@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Chart.Name }}-statefulset
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "postgres.labels" . | indent 4 }}
+spec:
+  serviceName: {{ .Chart.Name }}-service
+  replicas: {{ .Values.statefulset.replicas }}
+  selector:
+    matchLabels:
+{{ include "postgres.selectorLabels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "postgres.labels" . | indent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: {{ .Chart.Name }}
+        {{- with .Values.statefulset.image }}
+        image: {{ printf "%s:%s" .name .tag }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.ports.port }}
+        volumeMounts:
+        - name: {{ .Chart.Name }}-data
+          mountPath: {{ .Values.statefulset.mountPath }}
+        env:
+        {{- range $key, $val := .Values.statefulset.env.values }}
+        - name: {{ $key }}
+          value: {{ $val | quote }}
+        {{- end }}
+        {{- range $key, $val := .Values.statefulset.env.secret }}
+        - name: {{ $key }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgres.secretName" $ }}
+              key: {{ $val }}
+        {{- end }}
+        {{- range $key, $val := .Values.statefulset.env.config }}
+        - name: {{ $key }}
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "postgres.configMapName" $ }}
+              key: {{ $val }}
+        {{- end }}
+
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ .Chart.Name }}-data
+    spec:
+      {{- with .Values.statefulset.pvc }}
+      accessModes:
+        - {{ .accessModes | quote }}
+      storageClassName: {{ .storageClassName | quote }}
+      resources:
+        requests:
+          storage: {{ .resources.requests.storage }}
+      {{- end }}

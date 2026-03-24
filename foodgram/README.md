@@ -115,4 +115,7 @@ docker-compose exec backend python manage.py import_data
 docker-compose exec backend pytest
 ```
 
+## Kubernetes (Helm)
+
+Helm umbrella chart lives in `helm/app/` (subcharts `back`, `front`, `postgres`). Secrets workflow is in `deploy/README.md`; convenience script: `helm/deploy.sh`.
 
