@@ -10,7 +10,6 @@ echo "Initializing Vault in namespace: $NAMESPACE"
 #UNSEAL_KEY="$(python3 -c 'import json;print(json.load(open("vault-init.json"))["unseal_keys_b64"][0])')"
 #ROOT_TOKEN="$(python3 -c 'import json;print(json.load(open("vault-init.json"))["root_token"])')"
 ROOT_TOKEN="${VAULT_ROOT_TOKEN:?}"
-ROOT_TOKEN="hvs.6Gu0OMLN5S9UDnnBS3Bo6bqs"
 
 #kubectl exec -n "$NAMESPACE" vault-0 -- vault operator unseal "$UNSEAL_KEY"
 kubectl exec -n "$NAMESPACE" vault-0 -- vault login "$ROOT_TOKEN"
