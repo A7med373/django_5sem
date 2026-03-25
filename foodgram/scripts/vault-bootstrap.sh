@@ -4,13 +4,15 @@ set -euo pipefail
 NAMESPACE="${1:-vault}"
 
 echo "Initializing Vault in namespace: $NAMESPACE"
-INIT_JSON="$(kubectl exec -n "$NAMESPACE" vault-0 -- vault operator init -format=json)"
-echo "$INIT_JSON" > vault-init.json
+#INIT_JSON="$(kubectl exec -n "$NAMESPACE" vault-0 -- vault operator init -format=json)"
+#echo "$INIT_JSON" > vault-init.json
 
-UNSEAL_KEY="$(python3 -c 'import json;print(json.load(open("vault-init.json"))["unseal_keys_b64"][0])')"
-ROOT_TOKEN="$(python3 -c 'import json;print(json.load(open("vault-init.json"))["root_token"])')"
+#UNSEAL_KEY="$(python3 -c 'import json;print(json.load(open("vault-init.json"))["unseal_keys_b64"][0])')"
+#ROOT_TOKEN="$(python3 -c 'import json;print(json.load(open("vault-init.json"))["root_token"])')"
 
-kubectl exec -n "$NAMESPACE" vault-0 -- vault operator unseal "$UNSEAL_KEY"
+ROOT_TOKEN="hvs.6Gu0OMLN5S9UDnnBS3Bo6bqs"
+
+#kubectl exec -n "$NAMESPACE" vault-0 -- vault operator unseal "$UNSEAL_KEY"
 kubectl exec -n "$NAMESPACE" vault-0 -- vault login "$ROOT_TOKEN"
 kubectl exec -n "$NAMESPACE" vault-0 -- vault secrets enable -path=kv kv-v2 || true
 kubectl exec -n "$NAMESPACE" vault-0 -- vault kv put kv/foodgram/db postgres-password="postgresmaster"

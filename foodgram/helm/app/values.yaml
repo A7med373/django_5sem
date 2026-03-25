@@ -17,7 +17,22 @@ global:
     front: foodgram-frontend-service
 
 # Vault refs (helm-secrets + vals); override paths to match your Vault KV layout
+rabbitmq:
+  auth:
+    username: "ref+vault://kv/foodgram/rabbitmq#rabbitmq-user"
+    password: "ref+vault://kv/foodgram/rabbitmq#rabbitmq-password"
+  service:
+    type: LoadBalancer
+  ingress:
+    enabled: true
+    hostname: rabbitmq.local
+    ingressClassName: "nginx"
+    path: /
+    pathType: Prefix
+
 postgres:
+  auth:
+    password: "ref+vault://kv/foodgram/db#postgres-password"
   secrets:
     postgres-password: ref+vault://kv/data/foodgram/db#postgres-password
     postgres-user: ref+vault://kv/data/foodgram/db#postgres-user

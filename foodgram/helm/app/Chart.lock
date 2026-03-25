@@ -8,5 +8,8 @@ dependencies:
 - name: postgres
   repository: file://charts/postgres
   version: 0.1.0
-digest: sha256:9c2c4f312372d28d570f118cbf024b5d2888ee6360a76626e9d5ccfb0dfcf12f
-generated: "2026-03-24T21:07:45.972936+03:00"
+- name: rabbitmq
+  repository: file://charts/rabbitmq
+  version: 0.19.7
+digest: sha256:562d3bedc1c6eacbf6da6deb81c829e2a1a79fbea35c88cb4acb6487b3dbfff4
+generated: "2026-03-25T16:54:20.527115+03:00"
