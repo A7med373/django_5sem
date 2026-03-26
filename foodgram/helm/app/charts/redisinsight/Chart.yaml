@@ -1,0 +1,14 @@
+annotations:
+  artifacthub.io/changes: |
+    - Added another pathType support for ingress
+  repository: heywood8/helm-charts
+apiVersion: v2
+appVersion: 2.28.0
+description: A Redisinsight Helm chart for kubernetes
+icon: https://avatars.githubusercontent.com/u/87389211
+maintainers:
+- email: lopatinik@yandex.ru
+  name: heywood8
+name: redisinsight
+type: application
+version: 0.4.5

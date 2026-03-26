@@ -19,3 +19,9 @@ dependencies:
   - name: rabbitmq
     version: "0.19.7"
     repository: "file://charts/rabbitmq"
+  - name: redis
+    version: 0.1.0
+    repository: "file://charts/redis"
+  - name: redisinsight
+    version: "*"
+    repository: "file://charts/redisinsight"

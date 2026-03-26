@@ -19,7 +19,13 @@ from api.serializers import (CustomUserSerializer, FavoriteSerializer,
 
 from recipes.models import (Favorite, Follow, Ingredient, Recipe, ShoppingList)
 
+# Импортируем наш менеджер кэша (файл cache_manager.py должен лежать в папке api/)
+from api.cache_manager import CacheManager
+
 User = get_user_model()
+
+# Инициализируем кэш один раз при запуске приложения
+cache = CacheManager()
 
 
 class ListRetriveViewSet(
@@ -43,6 +49,29 @@ class IngredientViewSet(ListRetriveViewSet):
     pagination_class = None
     search_fields = ('^name',)
     filterset_class = IngredientFilter
+
+    def list(self, request, *args, **kwargs):
+        # Генерируем уникальный ключ кэша на основе параметров поиска/фильтрации
+        query_string = request.GET.urlencode()
+        cache_key = f"ingredients_list_{query_string}" if query_string else "ingredients_list_all"
+
+        # ТЗ: Если есть данные в кэше - отдаем из кэша
+        if cache.exists(cache_key):
+            print(f"[CACHE HIT] Отдаем ингредиенты из Redis! Ключ: {cache_key}")
+            cached_data = cache.get(cache_key)
+            return Response(cached_data)
+
+        # ТЗ: Если нет - вычисляем (делаем SQL запрос к БД)
+        print(f"[CACHE MISS] Делаем SQL запрос к Postgres! Ключ: {cache_key}")
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        data = serializer.data
+
+        # ТЗ: Складываем в кэш на 24 часа (86400 секунд)
+        cache.set(cache_key, data, ttl=86400)
+
+        # ТЗ: Возвращаем вычисленное
+        return Response(data)
 
 
 class CustomUserViewSet(UserViewSet):

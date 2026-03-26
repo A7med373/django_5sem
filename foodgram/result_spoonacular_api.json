@@ -1,0 +1,67 @@
+{
+    "results": [
+        {
+            "id": 663559,
+            "title": "Tomato and lentil soup",
+            "image": "https://img.spoonacular.com/recipes/663559-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 715415,
+            "title": "Red Lentil Soup with Chicken and Turnips",
+            "image": "https://img.spoonacular.com/recipes/715415-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 639851,
+            "title": "Cod with Tomato-Olive-Chorizo Sauce and Mashed Potatoes",
+            "image": "https://img.spoonacular.com/recipes/639851-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 716004,
+            "title": "Quinoa and Chickpea Salad with Sun-Dried Tomatoes and Dried Cherries",
+            "image": "https://img.spoonacular.com/recipes/716004-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 782601,
+            "title": "Red Kidney Bean Jambalaya",
+            "image": "https://img.spoonacular.com/recipes/782601-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 716627,
+            "title": "Easy Homemade Rice and Beans",
+            "image": "https://img.spoonacular.com/recipes/716627-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 645555,
+            "title": "Green Tomato Salad",
+            "image": "https://img.spoonacular.com/recipes/645555-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 653549,
+            "title": "Okra Tomato Salad",
+            "image": "https://img.spoonacular.com/recipes/653549-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 658753,
+            "title": "Roma Tomato Bruschetta",
+            "image": "https://img.spoonacular.com/recipes/658753-312x231.jpg",
+            "imageType": "jpg"
+        },
+        {
+            "id": 639957,
+            "title": "Colorful Tomato and Spinach Seafood Pasta",
+            "image": "https://img.spoonacular.com/recipes/639957-312x231.jpg",
+            "imageType": "jpg"
+        }
+    ],
+    "offset": 0,
+    "number": 10,
+    "totalResults": 867
+}

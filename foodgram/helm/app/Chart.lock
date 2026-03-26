@@ -11,5 +11,11 @@ dependencies:
 - name: rabbitmq
   repository: file://charts/rabbitmq
   version: 0.19.7
-digest: sha256:562d3bedc1c6eacbf6da6deb81c829e2a1a79fbea35c88cb4acb6487b3dbfff4
-generated: "2026-03-25T16:54:20.527115+03:00"
+- name: redis
+  repository: file://charts/redis
+  version: 0.1.0
+- name: redisinsight
+  repository: file://charts/redisinsight
+  version: 0.4.5
+digest: sha256:5fa0ff63315ffe0af1076ddad46b040e24733bb77c708677e3cf9dfb60795e57
+generated: "2026-03-26T14:42:40.090535+03:00"

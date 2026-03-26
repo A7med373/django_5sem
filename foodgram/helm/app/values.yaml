@@ -90,7 +90,10 @@ back:
       staticMountPath: /app/backend_static/
       mediaMountPath: /app/backend_media/
     env:
-      values: {}
+      values:
+        REDIS_HOST: redis-headless
+        REDIS_PORT: "6379"
+        REDIS_PASSWORD: "ref+vault://kv/foodgram/redis#redis-password"
       config:
         DB_PORT: DB_PORT
         DB_HOST: DB_HOST
@@ -211,3 +214,20 @@ front:
   serviceAccount:
     create: false
     name: ""
+
+
+
+redis:
+  password: "ref+vault://kv/foodgram/redis#redis-password"
+
+redisinsight:
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hosts:
+      - host: redisinsight.local
+        paths:
+          - "/"
+  persistentVolume:
+    enabled: true
+    size: 2Gi
