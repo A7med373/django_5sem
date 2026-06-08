@@ -1,0 +1,26 @@
+nameOverride: ""
+fullnameOverride: ""
+
+locustTest:
+  name: load-test-v2
+  apiVersion: locust.cloud/v1
+  image: locustio/locust:2.31.5
+  workers: 2
+  host: http://back-service:8000
+  users: 300
+  spawnRate: 50
+  runTime: 5m
+  logLevel: INFO
+
+locustfile:
+  configMapName: load-test-v2-locustfile
+  key: locustfile.py
+
+ingress:
+  enabled: true
+  className: nginx
+  host: locust.foodgram.local
+  path: /
+  pathType: Prefix
+  serviceName: load-test-v2-webui
+  servicePort: 8089

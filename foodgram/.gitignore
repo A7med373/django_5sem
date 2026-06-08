@@ -147,5 +147,7 @@ media/
 
 # Helm / Vault local secrets
 helm/app/charts/*.tgz
+helm/.env
+deploy/.env
 vault-init.json
 vault-foodgram-policy.hcl

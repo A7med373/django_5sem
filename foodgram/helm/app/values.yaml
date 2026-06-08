@@ -34,9 +34,9 @@ postgres:
   auth:
     password: "ref+vault://kv/foodgram/db#postgres-password"
   secrets:
-    postgres-password: ref+vault://kv/data/foodgram/db#postgres-password
-    postgres-user: ref+vault://kv/data/foodgram/db#postgres-user
-    postgres-name: ref+vault://kv/data/foodgram/db#postgres-name
+    postgres-password: ref+vault://kv/foodgram/db#postgres-password
+    postgres-user: ref+vault://kv/foodgram/db#postgres-user
+    postgres-name: ref+vault://kv/foodgram/db#postgres-name
   configMap:
     DB_PORT: "5432"
     DB_HOST: ""
@@ -86,6 +86,13 @@ back:
       tag: v.2.1
     ports:
       containerPort: 8000
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
     volumeMounts:
       staticMountPath: /app/backend_static/
       mediaMountPath: /app/backend_media/
@@ -122,6 +129,42 @@ back:
       protocol: TCP
       port: 8000
       targetPort: 8000
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 50
+    targetMemoryUtilizationPercentage: null
+    behavior:
+      scaleUp:
+        stabilizationWindowSeconds: 0
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 60
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+        selectPolicy: Max
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 50
+            periodSeconds: 60
+        selectPolicy: Max
+  vpa:
+    enabled: true
+    updateMode: "Off"
+    controlledResources:
+      - cpu
+      - memory
+    minAllowed:
+      cpu: 100m
+      memory: 128Mi
+    maxAllowed:
+      cpu: "1"
+      memory: 1Gi
   persistence:
     static:
       storage: 5Gi

@@ -1,0 +1,25 @@
+apiVersion: {{ .Values.locustTest.apiVersion }}
+kind: LocustTest
+metadata:
+  name: {{ .Values.locustTest.name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "locust.labels" . | indent 4 }}
+spec:
+  image: {{ .Values.locustTest.image | quote }}
+  workers: {{ .Values.locustTest.workers }}
+  args: |
+    --host {{ .Values.locustTest.host }}
+    --users {{ .Values.locustTest.users }}
+    --spawn-rate {{ .Values.locustTest.spawnRate }}
+    --run-time {{ .Values.locustTest.runTime }}
+    --autostart
+  env:
+    - name: LOCUST_LOGLEVEL
+      value: {{ .Values.locustTest.logLevel | quote }}
+  locustfile:
+    configMap:
+      name: {{ .Values.locustfile.configMapName }}
