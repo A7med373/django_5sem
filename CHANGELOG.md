@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/A7med373/django_5sem/compare/v1.0.1...v1.0.2) (2026-06-09)
+
+### Bug Fixes
+
+* use in-cluster auth for helm deploy ([4e33ea3](https://github.com/A7med373/django_5sem/commit/4e33ea3728ffc85c8350939eeb1ec92724ad17c0))
+
 ## [1.0.1](https://github.com/A7med373/django_5sem/compare/v1.0.0...v1.0.1) (2026-06-09)
 
 ### Bug Fixes
