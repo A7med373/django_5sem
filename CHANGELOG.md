@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/A7med373/django_5sem/compare/v1.0.0...v1.0.1) (2026-06-09)
+
+### Bug Fixes
+
+* install helm tools in deploy job ([3a610ec](https://github.com/A7med373/django_5sem/commit/3a610ec734b3cf9f3ea3757b742ad76f0165b10f))
+
 ## 1.0.0 (2026-06-09)
 
 ### Features
