@@ -1,3 +1,9 @@
+## [1.0.4](https://github.com/A7med373/django_5sem/compare/v1.0.3...v1.0.4) (2026-06-09)
+
+### Bug Fixes
+
+* recreate collectstatic job on helm upgrade ([1d1b2f0](https://github.com/A7med373/django_5sem/commit/1d1b2f0aaf7c35c3b4ce9de5382cfe738b41b8fd))
+
 ## [1.0.3](https://github.com/A7med373/django_5sem/compare/v1.0.2...v1.0.3) (2026-06-09)
 
 ### Bug Fixes
