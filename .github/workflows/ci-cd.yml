@@ -81,6 +81,7 @@ jobs:
         with:
           context: ./foodgram/backend
           file: ./foodgram/backend/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ steps.images.outputs.backend_image }}:${{ needs.release.outputs.git_tag }}
@@ -91,6 +92,7 @@ jobs:
         with:
           context: ./foodgram/frontend
           file: ./foodgram/frontend/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ steps.images.outputs.frontend_image }}:${{ needs.release.outputs.git_tag }}
