@@ -1,3 +1,9 @@
+## [1.0.6](https://github.com/A7med373/django_5sem/compare/v1.0.5...v1.0.6) (2026-06-09)
+
+### Bug Fixes
+
+* add redis backend dependency ([b147d32](https://github.com/A7med373/django_5sem/commit/b147d32a33849777f5a591f9c74ab6899819b2f3))
+
 ## [1.0.5](https://github.com/A7med373/django_5sem/compare/v1.0.4...v1.0.5) (2026-06-09)
 
 ### Bug Fixes
