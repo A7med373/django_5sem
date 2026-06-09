@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем код приложения
 COPY foodgram/ .
-COPY ../data /app/data
+COPY data /app/data
 
 # Запускаем приложение
 CMD ["gunicorn", "foodgram.wsgi:application", "--bind", "0:8000"]

@@ -1,0 +1,146 @@
+name: Foodgram CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: foodgram-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build release tag
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.semantic.outputs.new_release_published }}
+      version: ${{ steps.semantic.outputs.new_release_version }}
+      git_tag: ${{ steps.semantic.outputs.new_release_git_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Semantic release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          extra_plugins: |
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/changelog
+            @semantic-release/github
+            @semantic-release/git
+            conventional-changelog-conventionalcommits
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    name: Build and push images
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      backend_image: ${{ steps.images.outputs.backend_image }}
+      frontend_image: ${{ steps.images.outputs.frontend_image }}
+      image_tag: ${{ needs.release.outputs.git_tag }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.git_tag }}
+
+      - name: Set image names
+        id: images
+        shell: bash
+        run: |
+          image_namespace="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "backend_image=${image_namespace}/backend" >> "$GITHUB_OUTPUT"
+          echo "frontend_image=${image_namespace}/frontend" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.images.outputs.backend_image }}:${{ needs.release.outputs.git_tag }}
+            ${{ steps.images.outputs.backend_image }}:latest
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.images.outputs.frontend_image }}:${{ needs.release.outputs.git_tag }}
+            ${{ steps.images.outputs.frontend_image }}:latest
+
+  deploy:
+    name: Deploy release
+    needs:
+      - release
+      - docker
+    if: needs.release.outputs.published == 'true'
+    runs-on: foodgram
+    environment: production
+    env:
+      RELEASE_NAME: foodgram
+      NAMESPACE: foodgram
+      HELM_SECRETS_BACKEND: vals
+      VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.git_tag }}
+
+      - name: Configure kubeconfig
+        if: env.KUBECONFIG_B64 != ''
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "$KUBECONFIG_B64" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Install helm plugins
+        shell: bash
+        run: |
+          helm plugin list | grep -q '^secrets' || helm plugin install https://github.com/jkroepke/helm-secrets
+
+      - name: Build chart dependencies
+        run: helm dependency build ./helm/app
+
+      - name: Deploy Helm chart
+        shell: bash
+        run: |
+          helm secrets --evaluate-templates -b vals upgrade --install "$RELEASE_NAME" ./helm/app \
+            --namespace "$NAMESPACE" \
+            --create-namespace \
+            -f ./helm/app/values.yaml \
+            --set back.deployment.image.name="${{ needs.docker.outputs.backend_image }}" \
+            --set back.deployment.image.tag="${{ needs.docker.outputs.image_tag }}" \
+            --set front.deployment.image.name="${{ needs.docker.outputs.frontend_image }}" \
+            --set front.deployment.image.tag="${{ needs.docker.outputs.image_tag }}"
