@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/A7med373/django_5sem/compare/v1.0.2...v1.0.3) (2026-06-09)
+
+### Bug Fixes
+
+* pin helm 3 for secrets plugin ([fda4b79](https://github.com/A7med373/django_5sem/commit/fda4b790a2bfe491b0d4fc5f02476b53e4001ecd))
+
 ## [1.0.2](https://github.com/A7med373/django_5sem/compare/v1.0.1...v1.0.2) (2026-06-09)
 
 ### Bug Fixes
