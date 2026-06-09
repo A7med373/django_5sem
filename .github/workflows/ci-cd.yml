@@ -79,8 +79,8 @@ jobs:
       - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: ./foodgram/backend
+          file: ./foodgram/backend/Dockerfile
           push: true
           tags: |
             ${{ steps.images.outputs.backend_image }}:${{ needs.release.outputs.git_tag }}
@@ -89,8 +89,8 @@ jobs:
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: ./foodgram/frontend
+          file: ./foodgram/frontend/Dockerfile
           push: true
           tags: |
             ${{ steps.images.outputs.frontend_image }}:${{ needs.release.outputs.git_tag }}
@@ -131,15 +131,15 @@ jobs:
           helm plugin list | grep -q '^secrets' || helm plugin install https://github.com/jkroepke/helm-secrets
 
       - name: Build chart dependencies
-        run: helm dependency build ./helm/app
+        run: helm dependency build ./foodgram/helm/app
 
       - name: Deploy Helm chart
         shell: bash
         run: |
-          helm secrets --evaluate-templates -b vals upgrade --install "$RELEASE_NAME" ./helm/app \
+          helm secrets --evaluate-templates -b vals upgrade --install "$RELEASE_NAME" ./foodgram/helm/app \
             --namespace "$NAMESPACE" \
             --create-namespace \
-            -f ./helm/app/values.yaml \
+            -f ./foodgram/helm/app/values.yaml \
             --set back.deployment.image.name="${{ needs.docker.outputs.backend_image }}" \
             --set back.deployment.image.tag="${{ needs.docker.outputs.image_tag }}" \
             --set front.deployment.image.name="${{ needs.docker.outputs.frontend_image }}" \
