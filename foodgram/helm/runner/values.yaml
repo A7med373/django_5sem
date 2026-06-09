@@ -10,6 +10,7 @@ containerMode:
 
 template:
   spec:
+    serviceAccountName: "foodgram-deployer"
     containers:
       - name: runner
         image: ghcr.io/actions/actions-runner:latest

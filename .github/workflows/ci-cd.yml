@@ -118,11 +118,38 @@ jobs:
           ref: ${{ needs.release.outputs.git_tag }}
 
       - name: Configure kubeconfig
-        if: env.KUBECONFIG_B64 != ''
         shell: bash
         run: |
           mkdir -p "$HOME/.kube"
-          echo "$KUBECONFIG_B64" | base64 -d > "$HOME/.kube/config"
+          if [[ -f /var/run/secrets/kubernetes.io/serviceaccount/token ]]; then
+            token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+            ca_path="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+            cat > "$HOME/.kube/config" <<EOF
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: in-cluster
+            cluster:
+              certificate-authority: ${ca_path}
+              server: https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}
+          contexts:
+          - name: in-cluster
+            context:
+              cluster: in-cluster
+              namespace: ${NAMESPACE}
+              user: runner
+          current-context: in-cluster
+          users:
+          - name: runner
+            user:
+              token: ${token}
+          EOF
+          elif [[ -n "${KUBECONFIG_B64}" ]]; then
+            echo "$KUBECONFIG_B64" | base64 -d > "$HOME/.kube/config"
+          else
+            echo "No in-cluster service account token or KUBECONFIG_B64 secret found" >&2
+            exit 1
+          fi
           chmod 600 "$HOME/.kube/config"
 
       - name: Set up Helm
@@ -153,7 +180,6 @@ jobs:
         run: |
           helm secrets --evaluate-templates -b vals upgrade --install "$RELEASE_NAME" ./foodgram/helm/app \
             --namespace "$NAMESPACE" \
-            --create-namespace \
             -f ./foodgram/helm/app/values.yaml \
             --set back.deployment.image.name="${{ needs.docker.outputs.backend_image }}" \
             --set back.deployment.image.tag="${{ needs.docker.outputs.image_tag }}" \
